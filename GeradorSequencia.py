@@ -138,7 +138,7 @@ class TesteSegundaChance:
         self.__quadros_memoria.append(pagina)
         
 class TesteNRU:
-    def __init__(self, quantidade_quadros: int):
+    def __init__(self, quantidade_quadros: int, refreshM, refreshR):
         self.__quantidade_page_fault = 0
         self.__quantidade_quadros = quantidade_quadros
         self.__quadros_memoria = []
@@ -148,6 +148,8 @@ class TesteNRU:
         self.__pagina_modificada = {}
         self.__contador_incrementaM = 0
         self.__contador_zera_todosR = 0
+        self.__refreshM = refreshM
+        self.__refreshR = refreshR
             
     @property
     def quantidade_page_fault(self):
@@ -163,14 +165,14 @@ class TesteNRU:
         o zeramento periódico do todos os bits R.
         '''
         self.__contador_incrementaM += 1
-        if self.__contador_incrementaM > 3000:
+        if self.__contador_incrementaM > self.__refreshM:
             indice = random.randint(1, len(self.__quadros_memoria)) - 1
             pagina_sorteada = self.__quadros_memoria[indice]
             self.__pagina_modificada[pagina_sorteada] = 1
             self.__contador_incrementaM = 0
             
         self.__contador_zera_todosR += 1
-        if self.__contador_zera_todosR > 100000:
+        if self.__contador_zera_todosR > self.__refreshR:
             for paginas in self.__quadros_memoria:
                 self.__pagina_referenciada[paginas] = 0
             self.__contador_zera_todosR = 0     
@@ -258,7 +260,7 @@ class TesteLRU:
 
 
 
-objeto = GeradorSequencia([(16, 16), (16, 8), (16, 4), (16, 2)], 400000)
+objeto = GeradorSequencia([(16, 16), (16, 8), (16, 4), (16, 2)], 90000)
 normal = objeto.gera_sequencia_normal()
 embaralhada = objeto.gera_sequencia_embaralhada()
 print("Total de páginas: ", objeto.acessos_realizados)
@@ -266,7 +268,7 @@ print("Total de páginas: ", objeto.acessos_realizados)
 qtidade_quadros = 40
 fifo = TesteFIFO(qtidade_quadros)
 relogio = TesteSegundaChance(qtidade_quadros)
-nru = TesteNRU(qtidade_quadros)
+nru = TesteNRU(qtidade_quadros, 3000, 100000)
 lru = TesteLRU(qtidade_quadros)
 
 for i in range(len(embaralhada)):
