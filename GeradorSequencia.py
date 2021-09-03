@@ -225,7 +225,38 @@ class TesteNRU:
         self.__pagina_modificada[pagina_sorteada] = 0
         self.__pagina_referenciada[pagina] = 1
         self.__pagina_modificada[pagina] = 0
-              
+
+
+class TesteLRU:
+    def __init__(self, quantidade_quadros: int):
+        self.__quantidade_page_fault = 0
+        self.__quantidade_quadros = quantidade_quadros
+        self.__quadros_memoria = []
+        for i in range(self.__quantidade_quadros):
+            self.__quadros_memoria.append(None)
+            
+    @property
+    def quantidade_page_fault(self):
+        return self.__quantidade_page_fault
+    
+    @quantidade_page_fault.setter
+    def quantidade_page_fault(self, quantidade_page_fault):
+        self.__quantidade_page_fault = quantidade_page_fault
+            
+    def insere_pagina(self, pagina):
+        if pagina in self.__quadros_memoria:
+            self.__quadros_memoria.remove(pagina)
+            self.__quadros_memoria.insert(0, pagina)
+            return
+        for i in range(self.__quantidade_quadros):
+            if self.__quadros_memoria[i] == None:
+                self.__quadros_memoria[i] = pagina
+                return
+        self.__quantidade_page_fault += 1
+        self.__quadros_memoria.pop()
+        self.__quadros_memoria.insert(0, pagina)    
+
+
 
 objeto = GeradorSequencia([(16, 16), (16, 8), (16, 4), (16, 2)], 400000)
 normal = objeto.gera_sequencia_normal()
@@ -236,11 +267,14 @@ qtidade_quadros = 40
 fifo = TesteFIFO(qtidade_quadros)
 relogio = TesteSegundaChance(qtidade_quadros)
 nru = TesteNRU(qtidade_quadros)
+lru = TesteLRU(qtidade_quadros)
+
 for i in range(len(embaralhada)):
     fifo.insere_pagina(embaralhada[i])
     relogio.insere_pagina(embaralhada[i])
     nru.insere_pagina(embaralhada[i])
+    lru.insere_pagina(embaralhada[i])
 print('Quantidade de page faults (FIFO): ', fifo.quantidade_page_fault)
 print('Quantidade de page faults (Relógio): ', relogio.quantidade_page_fault)
 print('Quantidade de page faults (NRU): ', nru.quantidade_page_fault)
-
+print('Quantidade de page faults (LRU): ', lru.quantidade_page_fault)
