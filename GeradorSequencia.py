@@ -4,7 +4,7 @@ import random
 class GeradorSequencia:
     
     def __init__(self, perfil:[], acessos_esperados: int):
-        self.__perfil = perfil # Exemplo: [(64, 16), (64, 8), (64, 4), (64, 2)]
+        self.__perfil = perfil # Exemplo: [(64 páginas dif, 16 de amplitude), (64, 8), (64, 4), (64, 2)]
         self.__acessos_esperados = acessos_esperados
         self.__acessos_realizados = 0
         self.__total_alocacoes = 0
@@ -14,33 +14,20 @@ class GeradorSequencia:
     @property
     def acessos_realizados(self):
         return self.__acessos_realizados
-    
-    @acessos_realizados.setter
-    def acessos_realizados(self, acessos_realizados):
-        self.__acessos_realizados = acessos_realizados
-        
+     
     @property
     def paginas_ordenadas(self):
         return self.__paginas_ordenadas
-    
-    @paginas_ordenadas.setter
-    def paginas_ordenadas(self, paginas_ordenadas):
-        self.__paginas_ordenadas = paginas_ordenadas
         
     @property
     def paginas_embaralhadas(self):
-        return self.__paginas_embaralhadas
-    
-    @paginas_embaralhadas.setter
-    def paginas_embaralhadas(self, paginas_embaralhadas):
-        self.__paginas_embaralhadas = paginas_embaralhadas
-        
+        return self.__paginas_embaralhadas      
 
     def gera_sequencia_normal(self):
         for i in range (len(self.__perfil)):
             self.__total_alocacoes += self.__perfil[i][0] * self.__perfil[i][1]
-        print('Alocações básicas: ', self.__total_alocacoes)
-        multiplicador = int(self.__acessos_esperados / self.__total_alocacoes) +1
+        #print('Alocações básicas: ', self.__total_alocacoes)
+        multiplicador = int(self.__acessos_esperados / self.__total_alocacoes)
         self.__acessos_realizados = multiplicador * self.__total_alocacoes
         
         pagina = 0
@@ -51,13 +38,7 @@ class GeradorSequencia:
                 for j in range(quantidade_alocacoes):
                     self.__paginas_ordenadas.append(pagina)
                 pagina += 1
-        
-        paginas_ordenadas_array = np.array(self.__paginas_ordenadas)
-        #print(paginas_ordenadas_array)
-        #print()
-        return self.__paginas_ordenadas
-
-                
+      
     def gera_sequencia_embaralhada(self):
         paginas_ordenadas_array = np.array(self.__paginas_ordenadas)
         np.random.shuffle(paginas_ordenadas_array)
@@ -79,11 +60,7 @@ class TesteFIFO:
     @property
     def quantidade_page_fault(self):
         return self.__quantidade_page_fault
-    
-    @quantidade_page_fault.setter
-    def quantidade_page_fault(self, quantidade_page_fault):
-        self.__quantidade_page_fault = quantidade_page_fault
-            
+           
     def insere_pagina(self, pagina):
         if pagina in self.__quadros_memoria:
             return
@@ -108,10 +85,6 @@ class TesteSegundaChance:
     @property
     def quantidade_page_fault(self):
         return self.__quantidade_page_fault
-    
-    @quantidade_page_fault.setter
-    def quantidade_page_fault(self, quantidade_page_fault):
-        self.__quantidade_page_fault = quantidade_page_fault
             
     def insere_pagina(self, pagina):
         self.__pagina_referenciada[pagina] = 1
@@ -126,12 +99,13 @@ class TesteSegundaChance:
         while contador < self.__quantidade_quadros:
             dado = self.__quadros_memoria[contador]
             if self.__pagina_referenciada[dado] == 1:
-                self.__quadros_memoria.pop(0)
+                self.__quadros_memoria.pop(contador)
                 self.__quadros_memoria.append(dado)
                 self.__pagina_referenciada[dado] = 0
             else:
-                self.__quadros_memoria.pop(0)
+                self.__quadros_memoria.pop(contador)
                 self.__quadros_memoria.append(pagina)
+                self.__pagina_referenciada[dado] = 0
                 return
             contador += 1
         self.__quadros_memoria.pop(0)
@@ -154,15 +128,11 @@ class TesteNRU:
     @property
     def quantidade_page_fault(self):
         return self.__quantidade_page_fault
-    
-    @quantidade_page_fault.setter
-    def quantidade_page_fault(self, quantidade_page_fault):
-        self.__quantidade_page_fault = quantidade_page_fault
-            
+
     def insere_pagina(self, pagina):
         '''
-        Neste ponto faremos a simulação de escrita em memória (seta 1 bit M das páginas presentes em quadros)
-        o zeramento periódico do todos os bits R.
+        Neste ponto faz a simulação de escrita em memória (seta 1 bit M das páginas presentes em quadros)
+        o zeramento periódico de todos os bits R.
         '''
         self.__contador_incrementaM += 1
         if self.__contador_incrementaM > self.__refreshM:
@@ -185,8 +155,7 @@ class TesteNRU:
             if self.__quadros_memoria[i] == None:
                 self.__quadros_memoria[i] = pagina
                 return
-        self.__quantidade_page_fault += 1
-        
+        self.__quantidade_page_fault += 1 
         classe0 = []
         classe1 = []
         classe2 = []
@@ -240,10 +209,6 @@ class TesteLRU:
     @property
     def quantidade_page_fault(self):
         return self.__quantidade_page_fault
-    
-    @quantidade_page_fault.setter
-    def quantidade_page_fault(self, quantidade_page_fault):
-        self.__quantidade_page_fault = quantidade_page_fault
             
     def insere_pagina(self, pagina):
         if pagina in self.__quadros_memoria:
@@ -259,24 +224,29 @@ class TesteLRU:
         self.__quadros_memoria.insert(0, pagina)    
 
 
-
-objeto = GeradorSequencia([(16, 16), (16, 8), (16, 4), (16, 2)], 90000)
-normal = objeto.gera_sequencia_normal()
+objeto = GeradorSequencia([(25, 16), (25, 8), (25, 4), (25, 2)], 1000000)
+objeto.gera_sequencia_normal()
 embaralhada = objeto.gera_sequencia_embaralhada()
 print("Total de páginas: ", objeto.acessos_realizados)
-
-qtidade_quadros = 40
+qtidade_quadros = 1
 fifo = TesteFIFO(qtidade_quadros)
 relogio = TesteSegundaChance(qtidade_quadros)
-nru = TesteNRU(qtidade_quadros, 3000, 100000)
+nru = TesteNRU(qtidade_quadros, 1000,10000)
 lru = TesteLRU(qtidade_quadros)
-
 for i in range(len(embaralhada)):
-    fifo.insere_pagina(embaralhada[i])
-    relogio.insere_pagina(embaralhada[i])
-    nru.insere_pagina(embaralhada[i])
-    lru.insere_pagina(embaralhada[i])
+     fifo.insere_pagina(embaralhada[i])
+     relogio.insere_pagina(embaralhada[i])
+     nru.insere_pagina(embaralhada[i])
+     lru.insere_pagina(embaralhada[i])
 print('Quantidade de page faults (FIFO): ', fifo.quantidade_page_fault)
 print('Quantidade de page faults (Relógio): ', relogio.quantidade_page_fault)
 print('Quantidade de page faults (NRU): ', nru.quantidade_page_fault)
 print('Quantidade de page faults (LRU): ', lru.quantidade_page_fault)
+
+
+
+
+
+
+
+
