@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import gc
 
 class GeradorSequencia:
     
@@ -223,12 +224,12 @@ class TesteLRU:
         self.__quadros_memoria.pop()
         self.__quadros_memoria.insert(0, pagina)    
 
-
-objeto = GeradorSequencia([(25, 16), (25, 8), (25, 4), (25, 2)], 1000000)
+'''
+objeto = GeradorSequencia([(25, 16), (25, 8), (25, 4), (25, 2)], 1000500)
 objeto.gera_sequencia_normal()
 embaralhada = objeto.gera_sequencia_embaralhada()
 print("Total de páginas: ", objeto.acessos_realizados)
-qtidade_quadros = 1
+qtidade_quadros = 60
 fifo = TesteFIFO(qtidade_quadros)
 relogio = TesteSegundaChance(qtidade_quadros)
 nru = TesteNRU(qtidade_quadros, 1000,10000)
@@ -242,10 +243,129 @@ print('Quantidade de page faults (FIFO): ', fifo.quantidade_page_fault)
 print('Quantidade de page faults (Relógio): ', relogio.quantidade_page_fault)
 print('Quantidade de page faults (NRU): ', nru.quantidade_page_fault)
 print('Quantidade de page faults (LRU): ', lru.quantidade_page_fault)
+'''
 
+'''
+# Teste 1: oferta 1.000.000 de páginas (perfil abaixo) para 4 algoritmos e analisa page faults.
+for cont in range(1, 201):
+    objeto = GeradorSequencia([(25, 16), (25, 8), (25, 4), (25, 2)], 1000500)
+    objeto.gera_sequencia_normal()
+    embaralhada = objeto.gera_sequencia_embaralhada()
+    qtidade_quadros = 60
+    fifo = TesteFIFO(qtidade_quadros)
+    relogio = TesteSegundaChance(qtidade_quadros)
+    nru = TesteNRU(qtidade_quadros, 1000,10000)
+    lru = TesteLRU(qtidade_quadros)
+    for i in range(len(embaralhada)):
+         fifo.insere_pagina(embaralhada[i])
+         relogio.insere_pagina(embaralhada[i])
+         nru.insere_pagina(embaralhada[i])
+         lru.insere_pagina(embaralhada[i])
+    print(cont, objeto.acessos_realizados, fifo.quantidade_page_fault, relogio.quantidade_page_fault, nru.quantidade_page_fault, lru.quantidade_page_fault)
+    del fifo
+    del relogio
+    del nru
+    del lru
+    gc.collect()
 
-
-
+# Teste 2a: oferta 1.000.000 de páginas (perfil abaixo) para 4 algoritmos e analisa page faults.
+# Repete oferta 1.000.000 de páginas (alterando quantidade de páginas para 10x, e quantidade de quadros para 10x)
+# para 4 algoritmos e analisa page faults. Ou seja, 
+for cont in range(1, 201):
+    objeto = GeradorSequencia([(250, 16), (250, 8), (250, 4), (250, 2)], 1005000)
+    objeto.gera_sequencia_normal()
+    embaralhada = objeto.gera_sequencia_embaralhada()
+    qtidade_quadros = 600
+    fifo = TesteFIFO(qtidade_quadros)
+    #relogio = TesteSegundaChance(qtidade_quadros)
+    #nru = TesteNRU(qtidade_quadros, 1000,10000)
+    #lru = TesteLRU(qtidade_quadros)
+    for i in range(len(embaralhada)):
+         fifo.insere_pagina(embaralhada[i])
+         #relogio.insere_pagina(embaralhada[i])
+         #nru.insere_pagina(embaralhada[i])
+         #lru.insere_pagina(embaralhada[i])
+    #print(cont, objeto.acessos_realizados, fifo.quantidade_page_fault, relogio.quantidade_page_fault, nru.quantidade_page_fault, lru.quantidade_page_fault)
+    print(cont, objeto.acessos_realizados, qtidade_quadros, fifo.quantidade_page_fault)
+    del fifo
+    #del relogio
+    #del nru
+    #del lru
+    gc.collect()
+'''
+'''
+# Teste 2b: oferta 1.000.000 de páginas (perfil abaixo) para 4 algoritmos e analisa page faults.
+# Repete oferta 1.000.000 de páginas (alterando quantidade de páginas para 10x, e quantidade de quadros para 10x)
+# para 4 algoritmos e analisa page faults. Ou seja, 
+for cont in range(1, 201):
+    objeto = GeradorSequencia([(25, 16), (25, 8), (25, 4), (25, 2)], 1005000)
+    objeto.gera_sequencia_normal()
+    embaralhada = objeto.gera_sequencia_embaralhada()
+    qtidade_quadros = 60
+    fifo = TesteFIFO(qtidade_quadros)
+    #relogio = TesteSegundaChance(qtidade_quadros)
+    #nru = TesteNRU(qtidade_quadros, 1000,10000)
+    #lru = TesteLRU(qtidade_quadros)
+    for i in range(len(embaralhada)):
+         fifo.insere_pagina(embaralhada[i])
+         #relogio.insere_pagina(embaralhada[i])
+         #nru.insere_pagina(embaralhada[i])
+         #lru.insere_pagina(embaralhada[i])
+    #print(cont, objeto.acessos_realizados, fifo.quantidade_page_fault, relogio.quantidade_page_fault, nru.quantidade_page_fault, lru.quantidade_page_fault)
+    print(cont, objeto.acessos_realizados, qtidade_quadros, fifo.quantidade_page_fault)
+    del fifo
+    #del relogio
+    #del nru
+    #del lru
+    gc.collect()
+'''
+# Teste 3a: oferta 1.000.000 de páginas (perfil abaixo) para 4 algoritmos e analisa page faults. Só que para este
+# teste haverá uma relação entre quadros e páginas variando de 10% a 100%.
+objeto = GeradorSequencia([(25, 16), (25, 8), (25, 4), (25, 2)], 1000500)
+objeto.gera_sequencia_normal()
+embaralhada = objeto.gera_sequencia_embaralhada()
+for cont in range(1, 11):
+    #qtidade_quadros = 60
+    qtidade_quadros = 10 * cont
+    fifo = TesteFIFO(qtidade_quadros)
+    relogio = TesteSegundaChance(qtidade_quadros)
+    nru = TesteNRU(qtidade_quadros, 1000,10000)
+    lru = TesteLRU(qtidade_quadros)
+    for i in range(len(embaralhada)):
+         fifo.insere_pagina(embaralhada[i])
+         relogio.insere_pagina(embaralhada[i])
+         nru.insere_pagina(embaralhada[i])
+         lru.insere_pagina(embaralhada[i])
+    print(cont, qtidade_quadros, objeto.acessos_realizados, fifo.quantidade_page_fault, relogio.quantidade_page_fault, nru.quantidade_page_fault, lru.quantidade_page_fault)
+    del fifo
+    del relogio
+    del nru
+    del lru
+'''
+# Teste 3b: oferta 1.000.000 de páginas (perfil abaixo) para 4 algoritmos e analisa page faults. Só que para este
+# teste haverá uma relação entre quadros e páginas variando de 10% a 100%.
+objeto = GeradorSequencia([(250, 16), (250, 8), (250, 4), (250, 2)], 1000500)
+objeto.gera_sequencia_normal()
+embaralhada = objeto.gera_sequencia_embaralhada()
+for cont in range(1, 11):
+    #qtidade_quadros = 60
+    qtidade_quadros = 100 * cont
+    fifo = TesteFIFO(qtidade_quadros)
+    relogio = TesteSegundaChance(qtidade_quadros)
+    nru = TesteNRU(qtidade_quadros, 1000,10000)
+    lru = TesteLRU(qtidade_quadros)
+    for i in range(len(embaralhada)):
+         fifo.insere_pagina(embaralhada[i])
+         relogio.insere_pagina(embaralhada[i])
+         nru.insere_pagina(embaralhada[i])
+         lru.insere_pagina(embaralhada[i])
+    print(cont, qtidade_quadros, objeto.acessos_realizados, fifo.quantidade_page_fault, relogio.quantidade_page_fault, nru.quantidade_page_fault, lru.quantidade_page_fault)
+    del fifo
+    del relogio
+    del nru
+    del lru
+    gc.collect()
+'''
 
 
 
